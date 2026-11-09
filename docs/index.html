@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lsmlm: Lee-Strazicich minimum LM unit root test for Python</title>
+<meta name="description" content="lsmlm is a Python package for the Lee-Strazicich minimum LM unit root test with zero, one, or two endogenous structural breaks.">
+<style>
+:root {
+  --bg: #ffffff; --panel: #f6f7f9; --ink: #1c2330; --muted: #5b6577; --line: #e2e6ec;
+  --accent: #1a5276; --accent-soft: #e8f0f6; --red: #b03a2e;
+  --code-bg: #f3f5f8; --out-bg: #fbfaf6; --out-line: #e9e4d4;
+  --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12161c; --panel: #181d25; --ink: #e4e8ee; --muted: #9aa5b6; --line: #2a313c;
+    --accent: #7fb6dc; --accent-soft: #1c2a36; --red: #e08a7f;
+    --code-bg: #1a2029; --out-bg: #1d1c17; --out-line: #37332a;
+  }
+  .figure img { filter: brightness(.92); }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 var(--sans); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+header.top {
+  position: sticky; top: 0; z-index: 10; height: 56px; display: flex; align-items: center;
+  gap: 24px; padding: 0 24px; background: var(--bg); border-bottom: 1px solid var(--line);
+}
+header.top .brand { font: 700 18px var(--mono); color: var(--ink); }
+header.top nav { margin-left: auto; display: flex; gap: 20px; font-size: 14px; }
+header.top nav a { color: var(--muted); }
+header.top nav a:hover { color: var(--accent); text-decoration: none; }
+
+.layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); max-width: 1180px; margin: 0 auto; }
+aside {
+  position: sticky; top: 56px; align-self: start; height: calc(100vh - 56px); overflow-y: auto;
+  padding: 28px 16px 40px 24px; border-right: 1px solid var(--line); font-size: 14px;
+}
+aside h4 { margin: 22px 0 6px; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+aside h4:first-child { margin-top: 0; }
+aside a { display: block; padding: 4px 10px; margin-left: -10px; border-radius: 6px; color: var(--ink); }
+aside a:hover { background: var(--panel); text-decoration: none; }
+aside a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+
+main { padding: 40px 48px 80px; min-width: 0; }
+main > section { max-width: 780px; }
+h1 { font: 700 40px/1.1 var(--mono); margin: 0 0 6px; letter-spacing: -.02em; }
+.tagline { font-size: 19px; color: var(--muted); margin: 0 0 18px; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; font-size: 12px; color: var(--muted); }
+.badges img { height: 20px; display: block; }
+h2 { font-size: 26px; margin: 56px 0 12px; padding-top: 20px; border-top: 1px solid var(--line); letter-spacing: -.01em; }
+h3 { font-size: 18px; margin: 30px 0 8px; }
+p { margin: 0 0 14px; }
+ul, ol { margin: 0 0 14px; padding-left: 22px; }
+li { margin-bottom: 4px; }
+
+code { font: 0.88em var(--mono); background: var(--code-bg); padding: 2px 5px; border-radius: 4px; }
+pre { margin: 0 0 16px; padding: 14px 16px; overflow-x: auto; border-radius: 8px; background: var(--code-bg);
+      border: 1px solid var(--line); font: 13.5px/1.55 var(--mono); }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre.out { background: var(--out-bg); border-color: var(--out-line); margin-top: -10px; font-size: 12.5px; }
+pre.out::before { content: "output"; display: block; margin-bottom: 6px; font: 600 10px var(--sans);
+                  letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.c { color: var(--muted); font-style: italic; }
+.k { color: var(--red); }
+.s { color: var(--accent); }
+
+.tablewrap { overflow-x: auto; margin: 0 0 18px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td:first-child code { white-space: nowrap; }
+
+.note { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 0 0 16px; }
+.note.warn { border-left-color: var(--red); }
+.note p:last-child { margin-bottom: 0; }
+.figure { margin: 0 0 20px; }
+.figure img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.figure figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.refs p { padding-left: 1.6em; text-indent: -1.6em; }
+footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); max-width: 780px; }
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+  aside { display: none; }
+  main { padding: 28px 16px 60px; }
+  header.top { padding: 0 16px; gap: 12px; }
+  header.top nav { gap: 14px; }
+  header.top nav a.opt { display: none; }
+  h1 { font-size: 32px; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="#introduction">lsmlm</a>
+  <nav>
+    <a href="https://github.com/gaussian2/lsmlm">GitHub</a>
+    <a class="opt" href="https://github.com/gaussian2/lsmlm/blob/main/VALIDATION.md">Validation</a>
+    <a class="opt" href="https://github.com/gaussian2/lsmlm/blob/main/CHANGELOG.md">Changelog</a>
+    <a href="https://github.com/gaussian2/lsmlm/issues">Issues</a>
+  </nav>
+</header>
+
+<div class="layout">
+<aside>
+  <h4>Getting started</h4>
+  <a href="#introduction">Introduction</a>
+  <a href="#installation">Installation</a>
+  <a href="#sample-data">Sample data</a>
+  <h4>Guide</h4>
+  <a href="#core-workflow">Core workflow</a>
+  <a href="#models">Models and options</a>
+  <a href="#results">Using the results</a>
+  <a href="#panels">Panels</a>
+  <a href="#application">Worked application</a>
+  <a href="#performance">Performance</a>
+  <h4>Reference</h4>
+  <a href="#api">API reference</a>
+  <a href="#method">Method</a>
+  <a href="#validation">Validation against Stata</a>
+  <a href="#requirements">Requirements</a>
+  <a href="#references">References</a>
+  <a href="#acknowledgments">Acknowledgments</a>
+</aside>
+
+<main>
+
+<section id="introduction">
+  <h1>lsmlm</h1>
+  <p class="tagline">Lee-Strazicich minimum LM unit root test with structural breaks, for Python.</p>
+  <div class="badges">
+    <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-blue">
+    <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-yellow">
+    <img alt="Version 1.2.0" src="https://img.shields.io/badge/version-1.2.0-informational">
+  </div>
+
+  <p><code>lsmlm</code> tests the null hypothesis of a unit root against the alternative of a
+  (trend-)stationary series, allowing for <strong>zero, one or two structural breaks whose dates are
+  chosen from the data</strong>. It implements the minimum Lagrange multiplier (LM) test of Lee and
+  Strazicich (2003, 2013) and, with no breaks, the LM test of Schmidt and Phillips (1992).</p>
+
+  <p>Standard unit root tests lose power when a real break is ignored, and ADF-type tests with
+  endogenous breaks can reject spuriously when the break occurs under the null. The minimum LM test
+  avoids both: its null distribution does not depend on breaks under the null, so a rejection points
+  to stationarity around the breaks, not to a unit root with breaks.</p>
+
+  <p>The package is a port of the Stata command <code>lsmlm</code>. It follows the Stata code step by
+  step, returns the same numbers, and prints the same results table
+  (see <a href="#validation">Validation against Stata</a>).</p>
+</section>
+
+<section id="installation">
+  <h2>Installation</h2>
+  <pre><code>pip install "git+https://github.com/gaussian2/lsmlm.git"</code></pre>
+  <p>The test itself needs only NumPy. Two optional extras add what the examples use:</p>
+  <pre><code><span class="c"># + pandas, for the bundled example dataset</span>
+pip install "lsmlm[data] @ git+https://github.com/gaussian2/lsmlm.git"
+
+<span class="c"># + matplotlib and openpyxl, for the worked application</span>
+pip install "lsmlm[examples] @ git+https://github.com/gaussian2/lsmlm.git"</code></pre>
+  <p>Requires Python 3.10 or later.</p>
+</section>
+
+<section id="sample-data">
+  <h2>Sample data</h2>
+  <p>The package ships the dataset used throughout this page: log relative per-capita income for
+  15 OECD countries, 1870-1994. The series <code>y</code> is
+  <code>log(GDP per capita / 15-country average)</code>, the variable studied by Strazicich, Lee and
+  Day (2004) to ask whether incomes are converging. A unit root in <code>y</code> means shocks to a
+  country's relative income are permanent (no convergence); stationarity means they die out.</p>
+  <pre><code><span class="k">from</span> lsmlm.datasets <span class="k">import</span> load_oecd15
+
+panel = load_oecd15()
+panel.head(4)</code></pre>
+  <pre class="out"> cid countrycode   country  year  gdppc  rel_gdppc        y
+   1         AUS Australia  1870 5217.0   1.469485 0.384912
+   1         AUS Australia  1871 5259.0   1.466378 0.382795
+   1         AUS Australia  1872 5663.0   1.528916 0.424559
+   1         AUS Australia  1873 6095.0   1.607877 0.474915</pre>
+  <p>It is a balanced panel of 15 countries by 125 years, built from the Maddison Project Database
+  2023 (Bolt and van Zanden 2024).</p>
+</section>
+
+<section id="core-workflow">
+  <h2>Core workflow</h2>
+  <p>There is one function. Pass it a series and its time variable:</p>
+  <pre><code><span class="k">from</span> lsmlm <span class="k">import</span> lsmlm
+
+france = panel[panel[<span class="s">"country"</span>] == <span class="s">"France"</span>]
+
+result = lsmlm(france[<span class="s">"y"</span>], france[<span class="s">"year"</span>], breaks=2, maxlag=8, mindist=5)</code></pre>
+  <pre class="out">------------------------------------------------------------------
+  Lee-Strazicich minimum LM unit root test
+------------------------------------------------------------------
+  Series:        y
+  Model:         trend break (level + trend shift)
+  Breaks:        2   (endogenously selected)
+  Max lag:       8    Lags chosen (GTOS): 3
+  Obs (regr.):   121
+  Sample:        1870 to 1994
+  Break 1:       1939   (lambda1 = 0.537)
+  Break 2:       1949   (lambda2 = 0.620)
+------------------------------------------------------------------
+  Test statistic (t on S(t-1)):    -7.9240
+  Critical values:   1%  -6.096    5%  -5.405    10%  -5.149
+  Decision:      Reject unit root at 1%
+------------------------------------------------------------------
+  Break significance (|t| on dummies >= 1.645):
+    Break 1:     significant
+    Break 2:     significant
+------------------------------------------------------------------</pre>
+  <p>Reading the table:</p>
+  <ul>
+    <li><strong>Test statistic</strong> is the smallest t-ratio on the lagged detrended series over all
+    candidate break dates. Reject the unit root when it lies below the critical value.</li>
+    <li><strong>Break 1 / Break 2</strong> are the dates that produced that minimum, in the units of
+    the time variable. Here the search picks 1939 and 1949, the start of the war and the recovery.
+    The published study, on an earlier vintage of the data, reports the same two dates.</li>
+    <li><strong>Lags chosen</strong> is the number of augmenting lags kept by the general-to-specific
+    rule, starting from <code>maxlag</code>.</li>
+    <li><strong>Break significance</strong> reports whether the break dummies matter at the 10% level.
+    If a break is not significant, a model with fewer breaks may fit better.</li>
+  </ul>
+</section>
+
+<section id="models">
+  <h2>Models and options</h2>
+  <h3>Number of breaks</h3>
+  <pre><code>lsmlm(y, year, breaks=2)   <span class="c"># two breaks (the default)</span>
+lsmlm(y, year, breaks=1)   <span class="c"># one break</span>
+lsmlm(y, year, breaks=0)   <span class="c"># no break: the Schmidt-Phillips LM test</span></code></pre>
+
+  <h3>Trend-break or crash</h3>
+  <p><code>model="break"</code> (the default) allows a shift in both level and trend at each break:
+  Lee-Strazicich Model C. <code>model="crash"</code> allows a shift in level only: Model A.</p>
+  <pre><code>lsmlm(france[<span class="s">"y"</span>], france[<span class="s">"year"</span>], breaks=1, model=<span class="s">"crash"</span>, maxlag=8)</code></pre>
+  <pre class="out">------------------------------------------------------------------
+  Lee-Strazicich minimum LM unit root test
+------------------------------------------------------------------
+  Series:        y
+  Model:         crash (level shift)
+  Breaks:        1   (endogenously selected)
+  Max lag:       8    Lags chosen (GTOS): 3
+  Obs (regr.):   121
+  Sample:        1870 to 1994
+  Break 1:       1948   (lambda1 = 0.612)
+------------------------------------------------------------------
+  Test statistic (t on S(t-1)):    -4.5582
+  Critical values:   1%  -4.001    5%  -3.401    10%  -3.091
+  Decision:      Reject unit root at 1%
+------------------------------------------------------------------
+  Break significance (|t| on dummies >= 1.645):
+    Break 1:     not significant
+------------------------------------------------------------------</pre>
+
+  <h3>Lags, trimming and break spacing</h3>
+  <ul>
+    <li><code>maxlag</code> is the largest number of augmenting lags considered. Left out, it is
+    <code>floor(4 * (T/100)^0.25)</code>, at least 1. With annual data, 8 is the choice in the
+    original papers.</li>
+    <li><code>trim</code> is the fraction of the sample excluded at each end of the break search
+    (default 0.10).</li>
+    <li><code>mindist</code> is the minimum number of observations between the two breaks
+    (default 2).</li>
+  </ul>
+
+  <h3>Sub-samples</h3>
+  <p>Subset the arrays before the call. This is the counterpart of Stata's <code>if</code> and
+  <code>in</code>.</p>
+  <pre><code>post = france[france[<span class="s">"year"</span>] &gt;= 1946]
+lsmlm(post[<span class="s">"y"</span>], post[<span class="s">"year"</span>], breaks=1, maxlag=4)</code></pre>
+
+  <h3>The time variable</h3>
+  <p><code>t</code> can be numeric or datetime-like. The data are sorted by it, rows with a missing
+  value in <code>y</code> or <code>t</code> are dropped, and repeated time values are an error. If
+  <code>t</code> is left out, <code>y</code> is taken to be in time order and breaks are reported as
+  positions <code>1..T</code>.</p>
+  <div class="note warn"><p>Observations are numbered consecutively after missing values are dropped,
+  as in the Stata command. A series with gaps in time is therefore treated as if it were
+  contiguous.</p></div>
+</section>
+
+<section id="results">
+  <h2>Using the results</h2>
+  <p>The function returns an <code>LSMLMResult</code>. Its attributes carry the names of the Stata
+  command's <code>r()</code> results.</p>
+  <pre><code>r = lsmlm(france[<span class="s">"y"</span>], france[<span class="s">"year"</span>], breaks=2, maxlag=8, mindist=5,
+          print_results=<span class="k">False</span>)
+
+r.tau, r.k              <span class="c"># (-7.923986349193853, 3)</span>
+r.tb1, r.tb2            <span class="c"># (1939, 1949)</span>
+r.cv5, r.reject5        <span class="c"># (-5.40456, True)</span>
+r.siglevel              <span class="c"># '1%'</span>
+
+r.to_dict()             <span class="c"># everything, as a plain dict</span>
+print(r)                <span class="c"># the results table</span></code></pre>
+  <p>The full list is in the <a href="#api">API reference</a>.</p>
+</section>
+
+<section id="panels">
+  <h2>Panels</h2>
+  <p>The test applies to one series at a time. For a panel, loop over the units, switch the printing
+  off and collect the results:</p>
+  <pre><code><span class="k">import</span> pandas <span class="k">as</span> pd
+
+rows = []
+<span class="k">for</span> country, g <span class="k">in</span> panel.groupby(<span class="s">"country"</span>):
+    r = lsmlm(g[<span class="s">"y"</span>], g[<span class="s">"year"</span>], breaks=2, maxlag=8, mindist=5, print_results=<span class="k">False</span>)
+    rows.append({<span class="s">"country"</span>: country, **r.to_dict()})
+
+table = pd.DataFrame(rows)
+table[[<span class="s">"country"</span>, <span class="s">"N"</span>, <span class="s">"k"</span>, <span class="s">"tb1"</span>, <span class="s">"tb2"</span>, <span class="s">"tau"</span>, <span class="s">"cv5"</span>, <span class="s">"siglevel"</span>]]</code></pre>
+  <p>Passing several units in one call raises an error, because the time variable is then not
+  unique.</p>
+</section>
+
+<section id="application">
+  <h2>Worked application</h2>
+  <p>The repository includes a complete application,
+  <a href="https://github.com/gaussian2/lsmlm/blob/main/examples/oecd15_analysis.py"><code>examples/oecd15_analysis.py</code></a>:
+  are per-capita incomes converging among OECD countries? It produces descriptive statistics, three
+  results tables, piecewise-trend fits, a figure per country, two summary figures and an Excel
+  workbook.</p>
+  <pre><code>python examples/oecd15_analysis.py           <span class="c"># 3 countries, maxlag 2</span>
+python examples/oecd15_analysis.py --full    <span class="c"># 15 countries, maxlag 8</span></code></pre>
+
+  <h3>Two-break test, 1870-1994</h3>
+  <p>Trend-break model, <code>maxlag=8</code>, <code>mindist=5</code>, <code>trim=0.10</code>.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Country</th><th class="num">N</th><th class="num">k</th><th class="num">Break 1</th><th class="num">Break 2</th><th class="num">tau</th><th class="num">5% CV</th><th>Rejects at</th></tr></thead>
+    <tbody>
+    <tr><td>Australia</td><td class="num">116</td><td class="num">8</td><td class="num">1890</td><td class="num">1943</td><td class="num">-5.005</td><td class="num">-5.539</td><td>-</td></tr>
+    <tr><td>Austria</td><td class="num">119</td><td class="num">5</td><td class="num">1912</td><td class="num">1954</td><td class="num">-5.912</td><td class="num">-5.479</td><td>5%</td></tr>
+    <tr><td>Belgium</td><td class="num">123</td><td class="num">1</td><td class="num">1939</td><td class="num">1971</td><td class="num">-5.777</td><td class="num">-5.517</td><td>5%</td></tr>
+    <tr><td>Canada</td><td class="num">121</td><td class="num">3</td><td class="num">1916</td><td class="num">1940</td><td class="num">-5.845</td><td class="num">-5.470</td><td>5%</td></tr>
+    <tr><td>Denmark</td><td class="num">123</td><td class="num">1</td><td class="num">1930</td><td class="num">1945</td><td class="num">-6.349</td><td class="num">-5.418</td><td>1%</td></tr>
+    <tr><td>Finland</td><td class="num">121</td><td class="num">3</td><td class="num">1926</td><td class="num">1978</td><td class="num">-6.075</td><td class="num">-5.563</td><td>5%</td></tr>
+    <tr><td>France</td><td class="num">121</td><td class="num">3</td><td class="num">1939</td><td class="num">1949</td><td class="num">-7.924</td><td class="num">-5.405</td><td>1%</td></tr>
+    <tr><td>Germany</td><td class="num">121</td><td class="num">3</td><td class="num">1943</td><td class="num">1955</td><td class="num">-5.362</td><td class="num">-5.426</td><td>10%</td></tr>
+    <tr><td>Italy</td><td class="num">123</td><td class="num">1</td><td class="num">1940</td><td class="num">1950</td><td class="num">-6.831</td><td class="num">-5.418</td><td>1%</td></tr>
+    <tr><td>Netherlands</td><td class="num">123</td><td class="num">1</td><td class="num">1918</td><td class="num">1946</td><td class="num">-5.795</td><td class="num">-5.632</td><td>5%</td></tr>
+    <tr><td>New Zealand</td><td class="num">124</td><td class="num">0</td><td class="num">1926</td><td class="num">1945</td><td class="num">-5.166</td><td class="num">-5.638</td><td>-</td></tr>
+    <tr><td>Norway</td><td class="num">118</td><td class="num">6</td><td class="num">1911</td><td class="num">1966</td><td class="num">-6.353</td><td class="num">-5.467</td><td>1%</td></tr>
+    <tr><td>Sweden</td><td class="num">117</td><td class="num">7</td><td class="num">1888</td><td class="num">1953</td><td class="num">-5.268</td><td class="num">-5.544</td><td>10%</td></tr>
+    <tr><td>United Kingdom</td><td class="num">117</td><td class="num">7</td><td class="num">1938</td><td class="num">1954</td><td class="num">-4.878</td><td class="num">-5.378</td><td>-</td></tr>
+    <tr><td>United States</td><td class="num">116</td><td class="num">8</td><td class="num">1928</td><td class="num">1946</td><td class="num">-6.008</td><td class="num">-5.587</td><td>5%</td></tr>
+    </tbody>
+  </table></div>
+  <p>Twelve of the fifteen series reject the unit root at the 10% level. The data are the 2023
+  Maddison vintage, so the numbers differ somewhat from the published study, which used the 1995
+  vintage.</p>
+
+  <h3>Figures</h3>
+  <figure class="figure">
+    <img src="img/fig_France.png" alt="France: log relative per-capita income 1870-1994 with a piecewise trend and breaks at 1939 and 1949" loading="lazy">
+    <figcaption>One figure per country: the series, the estimated break dates and the piecewise trend fitted at those dates.</figcaption>
+  </figure>
+  <figure class="figure">
+    <img src="img/fig_summary_test_results.png" alt="Test statistic and 5% critical value for each of the 15 countries" loading="lazy">
+    <figcaption>Test statistic against the 5% critical value. The unit root is rejected where the dot lies to the left of the bar.</figcaption>
+  </figure>
+  <figure class="figure">
+    <img src="img/fig_summary_break_timing.png" alt="Timing of the two estimated breaks for each of the 15 countries" loading="lazy">
+    <figcaption>Timing of the estimated breaks. Eight of the fifteen second breaks fall between 1940 and 1950.</figcaption>
+  </figure>
+</section>
+
+<section id="performance">
+  <h2>Performance</h2>
+  <p>The break search is a grid search: every candidate date, or pair of dates, gets its own
+  regressions. Run time therefore grows with the sample length and, for two breaks, roughly with its
+  square.</p>
+  <ul>
+    <li>A two-break test on 125 annual observations with <code>maxlag=8</code> takes about one second.</li>
+    <li>The full 15-country application above (three tables, 17 figures) runs in under a minute.</li>
+    <li>For long series, a larger <code>trim</code> or <code>mindist</code> shrinks the grid, and a
+    smaller <code>maxlag</code> cuts the regressions per grid point.</li>
+  </ul>
+</section>
+
+<section id="api">
+  <h2>API reference</h2>
+
+  <h3><code>lsmlm(y, t=None, breaks=2, model="break", maxlag=None, trim=0.10, mindist=None, varname="y", print_results=True)</code></h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Argument</th><th>Stata option</th><th>Description</th><th>Default</th></tr></thead>
+    <tbody>
+    <tr><td><code>y</code></td><td><em>varname</em></td><td>The series to test: any one-dimensional array-like. Missing values are dropped.</td><td>required</td></tr>
+    <tr><td><code>t</code></td><td><code>timevar()</code></td><td>Time variable, numeric or datetime-like, with unique values.</td><td>positions <code>1..T</code></td></tr>
+    <tr><td><code>breaks</code></td><td><code>breaks()</code></td><td>Number of breaks: 0, 1 or 2.</td><td><code>2</code></td></tr>
+    <tr><td><code>model</code></td><td><code>model()</code></td><td><code>"break"</code> (level and trend shift) or <code>"crash"</code> (level shift). Ignored when <code>breaks=0</code>.</td><td><code>"break"</code></td></tr>
+    <tr><td><code>maxlag</code></td><td><code>maxlag()</code></td><td>Largest number of augmenting lags considered.</td><td><code>floor(4*(T/100)^0.25)</code>, at least 1</td></tr>
+    <tr><td><code>trim</code></td><td><code>trim()</code></td><td>Fraction trimmed at each end of the break search; strictly between 0 and 0.5.</td><td><code>0.10</code></td></tr>
+    <tr><td><code>mindist</code></td><td><code>mindist()</code></td><td>Minimum observations between the two breaks (two-break case).</td><td><code>2</code></td></tr>
+    <tr><td><code>varname</code></td><td></td><td>Label for the series in the printed table.</td><td><code>"y"</code></td></tr>
+    <tr><td><code>print_results</code></td><td><code>noprint</code></td><td>Print the results table.</td><td><code>True</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>Raises <code>LSMLMError</code> (a <code>ValueError</code>) for an invalid option, a sample of
+  fewer than 20 observations, an empty break window, or when no configuration can be estimated.</p>
+
+  <h3><code>LSMLMResult</code></h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Attribute</th><th>Description</th></tr></thead>
+    <tbody>
+    <tr><td><code>tau</code></td><td>The test statistic.</td></tr>
+    <tr><td><code>k</code></td><td>Number of augmenting lags chosen.</td></tr>
+    <tr><td><code>N</code></td><td>Observations in the final test regression.</td></tr>
+    <tr><td><code>cv1</code>, <code>cv5</code>, <code>cv10</code></td><td>Critical values at 1%, 5% and 10%.</td></tr>
+    <tr><td><code>reject1</code>, <code>reject5</code>, <code>reject10</code></td><td>Whether the unit root is rejected at each level.</td></tr>
+    <tr><td><code>siglevel</code></td><td><code>"1%"</code>, <code>"5%"</code>, <code>"10%"</code> or <code>"Not significant"</code>.</td></tr>
+    <tr><td><code>decision</code></td><td>The outcome in words.</td></tr>
+    <tr><td><code>tb1</code>, <code>tb2</code></td><td>Break dates, in the units of the time variable.</td></tr>
+    <tr><td><code>tb1_index</code>, <code>tb2_index</code></td><td>Break positions in the sample, counted from 1.</td></tr>
+    <tr><td><code>lambda1</code>, <code>lambda2</code></td><td>Break fractions used to look up the critical values.</td></tr>
+    <tr><td><code>break1_sig10</code>, <code>break2_sig10</code></td><td>Whether each break's dummies are significant at 10%.</td></tr>
+    <tr><td><code>tB1</code>, <code>tB2</code></td><td>t-ratios on the one-period break dummies.</td></tr>
+    <tr><td><code>tD1</code>, <code>tD2</code></td><td>t-ratios on the step dummies (trend-break model only).</td></tr>
+    <tr><td><code>breaks</code>, <code>model</code>, <code>maxlag</code>, <code>trim</code>, <code>mindist</code></td><td>The settings used, with defaults resolved.</td></tr>
+    <tr><td><code>tmin</code>, <code>tmax</code></td><td>First and last time value of the sample.</td></tr>
+    <tr><td><code>summary()</code>, <code>to_dict()</code></td><td>The results table as text; all attributes as a dictionary.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Attributes that do not apply are <code>None</code>: for example <code>tb2</code> with one break,
+  or <code>tD1</code> in the crash model.</p>
+
+  <h3><code>critical_values(breaks, model, nobs, lambda1=None, lambda2=None)</code></h3>
+  <p>Returns the 1%, 5% and 10% critical values as a named tuple <code>(cv1, cv5, cv10)</code>, the
+  same lookup <code>lsmlm()</code> uses.</p>
+
+  <h3><code>lsmlm.datasets.load_oecd15()</code></h3>
+  <p>Returns the example panel as a pandas DataFrame. Needs pandas.</p>
+</section>
+
+<section id="method">
+  <h2>Method</h2>
+  <p>Write the deterministic part as <code>Z(t)</code>. For a break at position <code>b</code> define
+  the impulse <code>B = 1{t = b+1}</code>, the step <code>D = 1{t &gt; b}</code> and the trend shift
+  <code>T = (t-b) 1{t &gt; b}</code>. The differenced terms <code>DZ</code> are:</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Model</th><th>Regressors in DZ</th><th>Removed from y to form S</th></tr></thead>
+    <tbody>
+    <tr><td>No break</td><td>constant</td><td>level, trend</td></tr>
+    <tr><td>Crash</td><td>constant, <code>B</code> for each break</td><td>level, trend, level steps</td></tr>
+    <tr><td>Trend-break</td><td>constant, <code>B</code> and <code>D</code> for each break</td><td>level, trend, level steps, trend shifts</td></tr>
+    </tbody>
+  </table></div>
+  <p>For each candidate break date, or pair of dates, in the trimmed sample:</p>
+  <ol>
+    <li>Regress <code>D.y</code> on <code>DZ</code> and use the coefficients to build the detrended
+    series <code>S(t)</code>, with <code>S(1) = 0</code>.</li>
+    <li>Regress <code>D.y</code> on <code>DZ</code>, <code>S(t-1)</code> and <code>k</code> lags of
+    <code>D.S</code>. Choose <code>k</code> general-to-specific: start at <code>maxlag</code> and
+    drop the last lag until its <code>|t|</code> is at least 1.645.</li>
+    <li>Record the t-ratio on <code>S(t-1)</code>.</li>
+  </ol>
+  <p>The test statistic is the minimum of those t-ratios, and the break dates are where it occurs.
+  Critical values are tabulated by sample size and, for the trend-break model, by the break
+  fractions; the tables and their interpolation come from the <code>leestra</code> Stata package.</p>
+</section>
+
+<section id="validation">
+  <h2>Validation against Stata</h2>
+  <p>The reference is the Stata package's own run of its worked example (France, United Kingdom and
+  United States). Its log and result files are kept in the repository under
+  <code>reference/stata/</code>, and the test suite compares against them.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Check</th><th>Agreement</th></tr></thead>
+    <tbody>
+    <tr><td>Stored results of 12 runs: statistic, lags, break dates, break fractions, critical values, rejection flags, dummy t-ratios</td><td>largest difference 1.3e-13</td></tr>
+    <tr><td>Printed results table, five runs covering no break, crash and trend-break models</td><td>identical, character for character</td></tr>
+    <tr><td>Piecewise-trend coefficients and R-squared of the worked example</td><td>within 1e-9</td></tr>
+    <tr><td>Example dataset</td><td>bit-for-bit equal</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Country</th><th class="num">Breaks</th><th class="num">Stata tau</th><th class="num">Python tau</th></tr></thead>
+    <tbody>
+    <tr><td>France</td><td class="num">1939, 1947</td><td class="num">-7.221908096419</td><td class="num">-7.221908096419</td></tr>
+    <tr><td>United Kingdom</td><td class="num">1938, 1948</td><td class="num">-4.680104157967</td><td class="num">-4.680104157967</td></tr>
+    <tr><td>United States</td><td class="num">1927, 1947</td><td class="num">-4.518985750277</td><td class="num">-4.518985750277</td></tr>
+    </tbody>
+  </table></div>
+  <p>Two breaks, trend-break model, <code>maxlag=2</code>, <code>mindist=5</code>.</p>
+  <div class="note"><p><strong>Scope.</strong> The comparison is against saved Stata output, not fresh
+  Stata runs. The reference has no two-break crash case; that model is checked against an independent
+  brute-force implementation instead. Samples of 250 observations or more are not covered by the
+  reference.</p></div>
+  <div class="note warn"><p><strong>Critical values and sample size.</strong> To match Stata, the
+  package reproduces the Stata command's weighting between tabulated sample sizes, in which the
+  weights on the two neighbouring rows are swapped relative to ordinary linear interpolation. With
+  123 observations, for example, the value is taken 85% from the T = 250 row and 15% from the
+  T = 100 row.
+  Details and an example are in
+  <a href="https://github.com/gaussian2/lsmlm/blob/main/VALIDATION.md">VALIDATION.md</a>.</p></div>
+</section>
+
+<section id="requirements">
+  <h2>Requirements</h2>
+  <ul>
+    <li>Python 3.10 or later</li>
+    <li>NumPy 1.22 or later</li>
+    <li>Optional: pandas 1.4+ (example dataset), matplotlib 3.5+ and openpyxl 3.0+ (worked application)</li>
+  </ul>
+  <p>To work on the package:</p>
+  <pre><code>git clone https://github.com/gaussian2/lsmlm.git
+cd lsmlm
+pip install -e ".[dev]"
+pytest</code></pre>
+</section>
+
+<section id="references" class="refs">
+  <h2>References</h2>
+  <p>Lee, J., and M. C. Strazicich. 2003. Minimum Lagrange multiplier unit root test with two
+  structural breaks. <em>Review of Economics and Statistics</em> 85(4): 1082-1089.</p>
+  <p>Lee, J., and M. C. Strazicich. 2013. Minimum LM unit root test with one structural break.
+  <em>Economics Bulletin</em> 33(4): 2483-2492.</p>
+  <p>Schmidt, P., and P. C. B. Phillips. 1992. LM tests for a unit root in the presence of
+  deterministic trends. <em>Oxford Bulletin of Economics and Statistics</em> 54(3): 257-287.</p>
+  <p>Strazicich, M. C., J. Lee, and E. Day. 2004. Are incomes converging among OECD countries? Time
+  series evidence with two structural breaks. <em>Journal of Macroeconomics</em> 26: 131-145.</p>
+  <p>Bolt, J., and J. L. van Zanden. 2024. Maddison style estimates of the evolution of the world
+  economy: A new 2023 update. <em>Journal of Economic Surveys</em> 1-41.</p>
+</section>
+
+<section id="acknowledgments">
+  <h2>Acknowledgments</h2>
+  <ul>
+    <li>The Stata command <code>lsmlm</code>, which this package ports, was written by Ibrahim Ongoren
+    (Pamukkale University).</li>
+    <li>The critical-value tables and interpolation routines come from the <code>leestra</code> Stata
+    package by H. Ozan Eruygur (SSC s459688).</li>
+    <li>The example dataset is derived from the Maddison Project Database 2023, licensed under
+    CC BY 4.0.</li>
+  </ul>
+  <p>Released under the <a href="https://github.com/gaussian2/lsmlm/blob/main/LICENSE">MIT License</a>.
+  Notices for third-party material are in
+  <a href="https://github.com/gaussian2/lsmlm/blob/main/THIRD_PARTY_NOTICES.md">THIRD_PARTY_NOTICES.md</a>.</p>
+</section>
+
+<footer>
+  <code>lsmlm</code> is maintained by Junsoo Lee, University of Alabama.
+  Source on <a href="https://github.com/gaussian2/lsmlm">GitHub</a>.
+</footer>
+
+</main>
+</div>
+
+<script>
+// Highlight the sidebar entry of the section in view.
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll("aside a"));
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+  if (!("IntersectionObserver" in window)) return;
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      links.forEach(function (a) { a.classList.remove("active"); });
+      var link = byId[entry.target.id];
+      if (link) link.classList.add("active");
+    });
+  }, { rootMargin: "-70px 0px -70% 0px" });
+  document.querySelectorAll("main section[id]").forEach(function (s) { observer.observe(s); });
+})();
+</script>
+</body>
+</html>

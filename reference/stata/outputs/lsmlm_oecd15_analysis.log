@@ -1,0 +1,1020 @@
+------------------------------------------------------------------------------------------------------------------------
+      name:  main
+       log:  C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/lsmlm_oecd15_analysis.log
+  log type:  text
+ opened on:  22 Jul 2026, 12:24:21
+
+. 
+. timer clear 1
+
+. timer on 1
+
+. 
+. *============================================================================
+. * SECTION 2  DESCRIPTIVE STATISTICS
+. *============================================================================
+. 
+. di as txt _n "{hline 78}"
+
+------------------------------------------------------------------------------
+
+. di as res  "  SECTION 2: Descriptive statistics"
+  SECTION 2: Descriptive statistics
+
+. di as txt  "{hline 78}"
+------------------------------------------------------------------------------
+
+. 
+. tempname D
+
+. postfile `D' str32 country int N double mean_gdppc double mean_rel ///
+>     double mean_y double sd_y double min_y double max_y ///
+>     using "$OUT/desc_stats.dta", replace
+(file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/desc_stats.dta not found)
+
+. 
+. foreach i of local cids {
+  2.     quietly levelsof country if cid==`i', local(cn) clean
+  3.     quietly summarize gdppc if cid==`i'
+  4.     local m_g = r(mean)
+  5.     local nn  = r(N)
+  6.     quietly summarize rel_gdppc if cid==`i'
+  7.     local m_r = r(mean)
+  8.     quietly summarize y if cid==`i'
+  9.     post `D' ("`cn'") (`nn') (`m_g') (`m_r') (r(mean)) (r(sd)) (r(min)) (r(max))
+ 10. }
+
+. postclose `D'
+
+. 
+. preserve
+
+.     use "$OUT/desc_stats.dta", clear
+
+.     format mean_gdppc %9.0f
+
+.     format mean_rel mean_y sd_y min_y max_y %7.3f
+
+.     list country N mean_gdppc mean_rel mean_y sd_y min_y max_y, noobs sepby(country) abbrev(12)
+
+  +--------------------------------------------------------------------------------+
+  |        country     N   mean_gdppc   mean_rel   mean_y    sd_y    min_y   max_y |
+  |--------------------------------------------------------------------------------|
+  |         France   125         9893      0.898   -0.115   0.131   -0.776   0.036 |
+  |--------------------------------------------------------------------------------|
+  | United Kingdom   125        11646      1.245    0.201   0.190   -0.134   0.496 |
+  |--------------------------------------------------------------------------------|
+  |  United States   125        15125      1.498    0.398   0.113    0.204   0.745 |
+  +--------------------------------------------------------------------------------+
+
+. restore
+
+. 
+. *============================================================================
+. * SECTION 3  SINGLE-COUNTRY WALKTHROUGH
+. *----------------------------------------------------------------------------
+. * Run every model variant on one country so the output of each is visible.
+. *============================================================================
+. 
+. di as txt _n "{hline 78}"
+
+------------------------------------------------------------------------------
+
+. di as res  "  SECTION 3: Single-country walkthrough (France)"
+  SECTION 3: Single-country walkthrough (France)
+
+. di as txt  "{hline 78}"
+------------------------------------------------------------------------------
+
+. 
+. preserve
+
+.     keep if country == "France"
+(250 observations deleted)
+
+.     tsset year, yearly
+
+Time variable: year, 1870 to 1994
+        Delta: 1 year
+
+. 
+.     di as txt _n ">>> (a) No break: Schmidt-Phillips LM test"
+
+>>> (a) No break: Schmidt-Phillips LM test
+
+.     lsmlm y, breaks(0) maxlag(`MAXLAG')
+
+------------------------------------------------------------------
+  Lee-Strazicich minimum LM unit root test
+------------------------------------------------------------------
+  Series:        y
+  Model:         no break (Schmidt-Phillips)
+  Breaks:        0   (endogenously selected)
+  Max lag:       2    Lags chosen (GTOS): 1
+  Obs (regr.):   123
+  Sample:        1870 to 1994
+------------------------------------------------------------------
+  Test statistic (t on S(t-1)):    -3.5815
+  Critical values:   1%  -3.576    5%  -3.024    10%  -2.747
+  Decision:      Reject unit root at 1%
+------------------------------------------------------------------
+
+. 
+.     di as txt _n ">>> (b) One break, crash model (level shift)"
+
+>>> (b) One break, crash model (level shift)
+
+.     lsmlm y, breaks(1) model(crash) maxlag(`MAXLAG') trim(`TRIM')
+
+------------------------------------------------------------------
+  Lee-Strazicich minimum LM unit root test
+------------------------------------------------------------------
+  Series:        y
+  Model:         crash (level shift)
+  Breaks:        1   (endogenously selected)
+  Max lag:       2    Lags chosen (GTOS): 1
+  Obs (regr.):   123
+  Sample:        1870 to 1994
+  Break 1:       1946   (lambda1 = 0.602)
+------------------------------------------------------------------
+  Test statistic (t on S(t-1)):    -4.3506
+  Critical values:   1%  -4.002    5%  -3.402    10%  -3.093
+  Decision:      Reject unit root at 1%
+------------------------------------------------------------------
+  Break significance (|t| on dummies >= 1.645):
+    Break 1:     significant
+------------------------------------------------------------------
+
+. 
+.     di as txt _n ">>> (c) One break, trend-break model (level + trend shift)"
+
+>>> (c) One break, trend-break model (level + trend shift)
+
+.     lsmlm y, breaks(1) model(break) maxlag(`MAXLAG') trim(`TRIM')
+
+------------------------------------------------------------------
+  Lee-Strazicich minimum LM unit root test
+------------------------------------------------------------------
+  Series:        y
+  Model:         trend break (level + trend shift)
+  Breaks:        1   (endogenously selected)
+  Max lag:       2    Lags chosen (GTOS): 1
+  Obs (regr.):   123
+  Sample:        1870 to 1994
+  Break 1:       1946   (lambda1 = 0.602)
+------------------------------------------------------------------
+  Test statistic (t on S(t-1)):    -4.5564
+  Critical values:   1%  -4.707    5%  -4.162    10%  -3.887
+  Decision:      Reject unit root at 5%
+------------------------------------------------------------------
+  Break significance (|t| on dummies >= 1.645):
+    Break 1:     significant
+------------------------------------------------------------------
+
+. 
+.     di as txt _n ">>> (d) Two breaks, trend-break model  [the main specification]"
+
+>>> (d) Two breaks, trend-break model  [the main specification]
+
+.     lsmlm y, breaks(2) model(break) maxlag(`MAXLAG') mindist(`MINDIST') trim(`TRIM')
+
+------------------------------------------------------------------
+  Lee-Strazicich minimum LM unit root test
+------------------------------------------------------------------
+  Series:        y
+  Model:         trend break (level + trend shift)
+  Breaks:        2   (endogenously selected)
+  Max lag:       2    Lags chosen (GTOS): 1
+  Obs (regr.):   123
+  Sample:        1870 to 1994
+  Break 1:       1939   (lambda1 = 0.545)
+  Break 2:       1947   (lambda2 = 0.610)
+------------------------------------------------------------------
+  Test statistic (t on S(t-1)):    -7.2219
+  Critical values:   1%  -6.108    5%  -5.418    10%  -5.162
+  Decision:      Reject unit root at 1%
+------------------------------------------------------------------
+  Break significance (|t| on dummies >= 1.645):
+    Break 1:     significant
+    Break 2:     significant
+------------------------------------------------------------------
+
+. 
+.     * Everything the command returns is available in r()
+.     di as txt _n ">>> Stored results from the last run:"
+
+>>> Stored results from the last run:
+
+.     di as txt "   tau       = " as res r(tau)
+   tau       = -7.2219081
+
+.     di as txt "   lags (k)  = " as res r(k)
+   lags (k)  = 1
+
+.     di as txt "   break 1   = " as res r(tb1) as txt "   lambda1 = " as res r(lambda1)
+   break 1   = 1939   lambda1 = .54471545
+
+.     di as txt "   break 2   = " as res r(tb2) as txt "   lambda2 = " as res r(lambda2)
+   break 2   = 1947   lambda2 = .6097561
+
+.     di as txt "   5% CV     = " as res r(cv5)
+   5% CV     = -5.4179467
+
+.     di as txt "   decision  = " as res "`r(siglevel)'"
+   decision  = 1%
+
+. 
+.     di as txt _n ">>> (e) Post-war sub-sample only, via if"
+
+>>> (e) Post-war sub-sample only, via if
+
+.     lsmlm y if year >= 1946, breaks(1) model(break) maxlag(`MAXLAG_SUB') trim(`TRIM')
+
+------------------------------------------------------------------
+  Lee-Strazicich minimum LM unit root test
+------------------------------------------------------------------
+  Series:        y
+  Model:         trend break (level + trend shift)
+  Breaks:        1   (endogenously selected)
+  Max lag:       2    Lags chosen (GTOS): 2
+  Obs (regr.):   46
+  Sample:        1946 to 1994
+  Break 1:       1976   (lambda1 = 0.587)
+------------------------------------------------------------------
+  Test statistic (t on S(t-1)):    -3.1841
+  Critical values:   1%  -4.902    5%  -4.341    10%  -4.061
+  Decision:      Do not reject unit root
+------------------------------------------------------------------
+  Break significance (|t| on dummies >= 1.645):
+    Break 1:     significant
+------------------------------------------------------------------
+
+. restore
+
+. 
+. *============================================================================
+. * SECTION 4  TABLE 1 - TWO-BREAK LM TEST, FULL SAMPLE
+. *============================================================================
+. 
+. di as txt _n "{hline 78}"
+
+------------------------------------------------------------------------------
+
+. di as res  "  SECTION 4: TABLE 1 - two-break LM test, 1870-1994"
+  SECTION 4: TABLE 1 - two-break LM test, 1870-1994
+
+. di as txt  "{hline 78}"
+------------------------------------------------------------------------------
+
+. 
+. tempname P1
+
+. postfile `P1' str32 country int N byte k int tb1 int tb2 ///
+>     double lambda1 double lambda2 double tau ///
+>     double cv1 double cv5 double cv10 ///
+>     byte rej1 byte rej5 byte rej10 ///
+>     byte b1sig byte b2sig ///
+>     double tB1 double tD1 double tB2 double tD2 ///
+>     using "$OUT/table1_two_break.dta", replace
+(file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/table1_two_break.dta not found)
+
+. 
+. foreach i of local cids {
+  2.     quietly levelsof country if cid==`i', local(cn) clean
+  3.     di as txt "  running: " as res "`cn'" _continue
+  4. 
+.     preserve
+  5.         quietly keep if cid==`i'
+  6.         quietly tsset year, yearly
+  7.         capture quietly lsmlm y, breaks(2) model(break) ///
+>             maxlag(`MAXLAG') mindist(`MINDIST') trim(`TRIM')
+  8.         local rc = _rc
+  9.         if `rc' == 0 {
+ 10.             post `P1' ("`cn'") (r(N)) (r(k)) (r(tb1)) (r(tb2)) ///
+>                 (r(lambda1)) (r(lambda2)) (r(tau)) ///
+>                 (r(cv1)) (r(cv5)) (r(cv10)) ///
+>                 (r(reject1)) (r(reject5)) (r(reject10)) ///
+>                 (r(break1_sig10)) (r(break2_sig10)) ///
+>                 (r(tB1)) (r(tD1)) (r(tB2)) (r(tD2))
+ 11.         }
+ 12.     restore
+ 13. 
+.     if `rc' == 0  di as txt "  done"
+ 14.     else          di as err "  FAILED (rc=`rc')"
+ 15.     if `rc' != 0 {
+ 16.         post `P1' ("`cn'") (.) (.) (.) (.) (.) (.) (.) (.) (.) (.) ///
+>             (.) (.) (.) (.) (.) (.) (.) (.) (.)
+ 17.     }
+ 18. }
+  running: France  done
+  running: United Kingdom  done
+  running: United States  done
+
+. postclose `P1'
+
+. 
+. preserve
+
+.     use "$OUT/table1_two_break.dta", clear
+
+.     gen str24 decision = cond(rej10==1, "convergence", "no convergence")
+
+.     label var decision "Unit root rejected at 10%?"
+
+.     gen str8 sig = cond(rej1==1,"1%", cond(rej5==1,"5%", cond(rej10==1,"10%","ns")))
+
+.     format tau cv1 cv5 cv10 %8.3f
+
+.     format lambda1 lambda2 %6.3f
+
+.     save "$OUT/table1_two_break.dta", replace
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/table1_two_break.dta saved
+
+. 
+.     di as txt _n "TABLE 1: Two-break minimum LM unit root test, 1870-1994"
+
+TABLE 1: Two-break minimum LM unit root test, 1870-1994
+
+.     list country N k tb1 tb2 tau cv5 sig decision, noobs abbrev(12) sep(0)
+
+  +---------------------------------------------------------------------------------+
+  |        country     N   k    tb1    tb2      tau      cv5   sig         decision |
+  |---------------------------------------------------------------------------------|
+  |         France   123   1   1939   1947   -7.222   -5.418    1%      convergence |
+  | United Kingdom   123   1   1938   1948   -4.680   -5.418    ns   no convergence |
+  |  United States   122   2   1927   1947   -4.519   -5.625    ns   no convergence |
+  +---------------------------------------------------------------------------------+
+
+. 
+.     quietly count if rej10==1
+
+.     di as txt _n "  Countries rejecting the unit root at 10%: " as res r(N) as txt " of " as res _N
+
+  Countries rejecting the unit root at 10%: 1 of 3
+
+. restore
+
+. 
+. *============================================================================
+. * SECTION 5  TABLE 2 - ONE-BREAK LM TEST, FULL SAMPLE
+. *----------------------------------------------------------------------------
+. * Useful as a robustness check, and as the preferred specification when the
+. * second break is not statistically relevant in Table 1.
+. *============================================================================
+. 
+. di as txt _n "{hline 78}"
+
+------------------------------------------------------------------------------
+
+. di as res  "  SECTION 5: TABLE 2 - one-break LM test, 1870-1994"
+  SECTION 5: TABLE 2 - one-break LM test, 1870-1994
+
+. di as txt  "{hline 78}"
+------------------------------------------------------------------------------
+
+. 
+. tempname P2
+
+. postfile `P2' str32 country int N byte k int tb1 double lambda1 double tau ///
+>     double cv1 double cv5 double cv10 ///
+>     byte rej1 byte rej5 byte rej10 byte b1sig ///
+>     double tB1 double tD1 ///
+>     using "$OUT/table2_one_break.dta", replace
+(file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/table2_one_break.dta not found)
+
+. 
+. foreach i of local cids {
+  2.     quietly levelsof country if cid==`i', local(cn) clean
+  3.     di as txt "  running: " as res "`cn'" _continue
+  4. 
+.     preserve
+  5.         quietly keep if cid==`i'
+  6.         quietly tsset year, yearly
+  7.         capture quietly lsmlm y, breaks(1) model(break) maxlag(`MAXLAG') trim(`TRIM')
+  8.         local rc = _rc
+  9.         if `rc' == 0 {
+ 10.             post `P2' ("`cn'") (r(N)) (r(k)) (r(tb1)) (r(lambda1)) (r(tau)) ///
+>                 (r(cv1)) (r(cv5)) (r(cv10)) ///
+>                 (r(reject1)) (r(reject5)) (r(reject10)) (r(break1_sig10)) ///
+>                 (r(tB1)) (r(tD1))
+ 11.         }
+ 12.     restore
+ 13. 
+.     if `rc' == 0  di as txt "  done"
+ 14.     else          di as err "  FAILED (rc=`rc')"
+ 15.     if `rc' != 0  post `P2' ("`cn'") (.) (.) (.) (.) (.) (.) (.) (.) (.) (.) (.) (.) (.) (.)
+ 16. }
+  running: France  done
+  running: United Kingdom  done
+  running: United States  done
+
+. postclose `P2'
+
+. 
+. preserve
+
+.     use "$OUT/table2_one_break.dta", clear
+
+.     gen str24 decision = cond(rej10==1, "convergence", "no convergence")
+
+.     gen str8 sig = cond(rej1==1,"1%", cond(rej5==1,"5%", cond(rej10==1,"10%","ns")))
+
+.     format tau cv1 cv5 cv10 %8.3f
+
+.     format lambda1 %6.3f
+
+.     save "$OUT/table2_one_break.dta", replace
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/table2_one_break.dta saved
+
+. 
+.     di as txt _n "TABLE 2: One-break minimum LM unit root test, 1870-1994"
+
+TABLE 2: One-break minimum LM unit root test, 1870-1994
+
+.     list country N k tb1 tau cv5 sig decision, noobs abbrev(12) sep(0)
+
+  +--------------------------------------------------------------------------+
+  |        country     N   k    tb1      tau      cv5   sig         decision |
+  |--------------------------------------------------------------------------|
+  |         France   123   1   1946   -4.556   -4.162    5%      convergence |
+  | United Kingdom   123   1   1947   -3.665   -4.161    ns   no convergence |
+  |  United States   122   2   1905   -3.841   -4.098   10%      convergence |
+  +--------------------------------------------------------------------------+
+
+. restore
+
+. 
+. *============================================================================
+. * SECTION 6  TABLE 3 - TWO-BREAK TEST ON SUB-SAMPLES
+. *----------------------------------------------------------------------------
+. * The world wars dominate the early part of the sample. Splitting the sample
+. * shows whether the convergence evidence is driven by the war period.
+. *============================================================================
+. 
+. di as txt _n "{hline 78}"
+
+------------------------------------------------------------------------------
+
+. di as res  "  SECTION 6: TABLE 3 - sub-sample analysis"
+  SECTION 6: TABLE 3 - sub-sample analysis
+
+. di as txt  "{hline 78}"
+------------------------------------------------------------------------------
+
+. 
+. tempname P3
+
+. postfile `P3' str32 country str16 sample int startyr int endyr ///
+>     int N byte k int tb1 int tb2 double tau ///
+>     double cv1 double cv5 double cv10 byte rej10 ///
+>     using "$OUT/table3_subsamples.dta", replace
+(file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/table3_subsamples.dta not found)
+
+. 
+. * sample label / first year / last year / breaks / maxlag
+. local S1 "full 1870 1994 2"
+
+. local S2 "pre-war 1870 1945 2"
+
+. local S3 "post-war 1946 1994 1"
+
+. 
+. foreach s in "`S1'" "`S2'" "`S3'" {
+  2.     tokenize "`s'"
+  3.     local slab "`1'"
+  4.     local y0   = `2'
+  5.     local y1   = `3'
+  6.     local nbr  = `4'
+  7.     local ml   = cond("`slab'"=="full", `MAXLAG', `MAXLAG_SUB')
+  8. 
+.     di as txt _n "  --- sub-sample: `slab' (`y0'-`y1'), breaks(`nbr'), maxlag(`ml')"
+  9. 
+.     foreach i of local cids {
+ 10.         quietly levelsof country if cid==`i', local(cn) clean
+ 11. 
+.         preserve
+ 12.             quietly keep if cid==`i' & inrange(year, `y0', `y1')
+ 13.             quietly tsset year, yearly
+ 14.             capture quietly lsmlm y, breaks(`nbr') model(break) ///
+>                 maxlag(`ml') mindist(`MINDIST') trim(`TRIM')
+ 15.             local rc = _rc
+ 16.             if `rc' == 0 {
+ 17.                 local tb2v = cond(`nbr'==2, r(tb2), .)
+ 18.                 post `P3' ("`cn'") ("`slab'") (`y0') (`y1') ///
+>                     (r(N)) (r(k)) (r(tb1)) (`tb2v') (r(tau)) ///
+>                     (r(cv1)) (r(cv5)) (r(cv10)) (r(reject10))
+ 19.             }
+ 20.         restore
+ 21. 
+.         if `rc' != 0 {
+ 22.             di as err "     `cn': FAILED (rc=`rc')"
+ 23.             post `P3' ("`cn'") ("`slab'") (`y0') (`y1') (.) (.) (.) (.) (.) (.) (.) (.) (.)
+ 24.         }
+ 25.     }
+ 26. }
+
+  --- sub-sample: full (1870-1994), breaks(2), maxlag(2)
+
+  --- sub-sample: pre-war (1870-1945), breaks(2), maxlag(2)
+
+  --- sub-sample: post-war (1946-1994), breaks(1), maxlag(2)
+
+. postclose `P3'
+
+. 
+. preserve
+
+.     use "$OUT/table3_subsamples.dta", clear
+
+.     gen str24 decision = cond(rej10==1, "convergence", "no convergence")
+
+.     format tau cv1 cv5 cv10 %8.3f
+
+.     save "$OUT/table3_subsamples.dta", replace
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/table3_subsamples.dta saved
+
+. 
+.     di as txt _n "TABLE 3: Two-break LM test across sub-samples"
+
+TABLE 3: Two-break LM test across sub-samples
+
+.     sort country sample
+
+.     list country sample N k tb1 tb2 tau cv10 decision, noobs abbrev(12) sepby(country)
+
+  +--------------------------------------------------------------------------------------+
+  |        country     sample     N   k    tb1    tb2      tau     cv10         decision |
+  |--------------------------------------------------------------------------------------|
+  |         France       full   123   1   1939   1947   -7.222   -5.162      convergence |
+  |         France   post-war    46   2   1976      .   -3.184   -4.061   no convergence |
+  |         France    pre-war    74   1   1921   1936   -5.109   -5.779   no convergence |
+  |--------------------------------------------------------------------------------------|
+  | United Kingdom       full   123   1   1938   1948   -4.680   -5.162   no convergence |
+  | United Kingdom   post-war    48   0   1978      .   -2.739   -4.043   no convergence |
+  | United Kingdom    pre-war    74   1   1915   1926   -4.997   -5.890   no convergence |
+  |--------------------------------------------------------------------------------------|
+  |  United States       full   122   2   1927   1947   -4.519   -5.295   no convergence |
+  |  United States   post-war    48   0   1978      .   -3.108   -4.043   no convergence |
+  |  United States    pre-war    73   2   1877   1930   -4.950   -5.541   no convergence |
+  +--------------------------------------------------------------------------------------+
+
+. 
+.     di as txt _n "  Rejection counts by sub-sample (rejected at 10% / tested):"
+
+  Rejection counts by sub-sample (rejected at 10% / tested):
+
+.     levelsof sample, local(samps)
+`"full"' `"post-war"' `"pre-war"'
+
+.     foreach s of local samps {
+  2.         quietly count if sample=="`s'" & rej10==1
+  3.         local nrej = r(N)
+  4.         quietly count if sample=="`s'" & !missing(rej10)
+  5.         di as txt "    " as res %-10s "`s'" as txt "  " as res `nrej' as txt " / " as res r(N)
+  6.     }
+    full        1 / 3
+    post-war    0 / 3
+    pre-war     0 / 3
+
+. restore
+
+. 
+. *============================================================================
+. * SECTION 7  PIECEWISE TREND MODELS AT THE ESTIMATED BREAKS
+. *----------------------------------------------------------------------------
+. * Once the break dates are known, fit a deterministic trend model with level
+. * and slope shifts at those dates to describe HOW relative income moved.
+. *     y_t = a + b*t + d1*D1 + d2*D2 + g1*T1 + g2*T2 + e_t
+. *============================================================================
+. 
+. di as txt _n "{hline 78}"
+
+------------------------------------------------------------------------------
+
+. di as res  "  SECTION 7: Piecewise trend models at the Table 1 breaks"
+  SECTION 7: Piecewise trend models at the Table 1 breaks
+
+. di as txt  "{hline 78}"
+------------------------------------------------------------------------------
+
+. 
+. tempname P4
+
+. postfile `P4' str32 country int tb1 int tb2 ///
+>     double b_t double b_D1 double b_T1 double b_D2 double b_T2 ///
+>     double r2 int N ///
+>     using "$OUT/piecewise_trends.dta", replace
+(file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/piecewise_trends.dta not found)
+
+. 
+. foreach i of local cids {
+  2.     quietly levelsof country if cid==`i', local(cn) clean
+  3. 
+.     * pull this country's break dates out of Table 1
+.     preserve
+  4.         quietly use "$OUT/table1_two_break.dta", clear
+  5.         quietly keep if country == "`cn'"
+  6.         local bk1 = tb1[1]
+  7.         local bk2 = tb2[1]
+  8.     restore
+  9. 
+.     if missing(`bk1') | missing(`bk2') {
+ 10.         di as err "  `cn': no break dates in Table 1, skipped"
+ 11.         continue
+ 12.     }
+ 13. 
+.     preserve
+ 14.         quietly keep if cid==`i'
+ 15.         quietly tsset year, yearly
+ 16.         quietly gen double t  = year - 1869
+ 17.         quietly gen double D1 = (year >  `bk1')
+ 18.         quietly gen double T1 = (year - `bk1') * (year > `bk1')
+ 19.         quietly gen double D2 = (year >  `bk2')
+ 20.         quietly gen double T2 = (year - `bk2') * (year > `bk2')
+ 21. 
+.         capture quietly regress y t D1 T1 D2 T2
+ 22.         if _rc == 0 {
+ 23.             post `P4' ("`cn'") (`bk1') (`bk2') ///
+>                 (_b[t]) (_b[D1]) (_b[T1]) (_b[D2]) (_b[T2]) (e(r2)) (e(N))
+ 24.             di as txt "  `cn': R2 = " as res %5.3f e(r2)
+ 25.         }
+ 26.         else di as err "  `cn': regression failed"
+ 27.     restore
+ 28. }
+  France: R2 = 0.706
+  United Kingdom: R2 = 0.930
+  United States: R2 = 0.679
+
+. postclose `P4'
+
+. 
+. preserve
+
+.     use "$OUT/piecewise_trends.dta", clear
+
+.     format b_* %9.5f
+
+.     format r2 %6.3f
+
+.     di as txt _n "Piecewise trend models (breaks taken from Table 1)"
+
+Piecewise trend models (breaks taken from Table 1)
+
+.     list country tb1 tb2 b_t b_D1 b_T1 b_D2 b_T2 r2, noobs abbrev(10) sep(0)
+
+  +---------------------------------------------------------------------------------------------+
+  |        country    tb1    tb2        b_t       b_D1       b_T1       b_D2       b_T2      r2 |
+  |---------------------------------------------------------------------------------------------|
+  |         France   1939   1947    0.00160   -0.41769    0.00163    0.33069    0.00058   0.706 |
+  | United Kingdom   1938   1948   -0.00415    0.14587   -0.00137   -0.15816   -0.00032   0.930 |
+  |  United States   1927   1947    0.00410   -0.30659    0.01320   -0.16014   -0.02211   0.679 |
+  +---------------------------------------------------------------------------------------------+
+
+. restore
+
+. 
+. *============================================================================
+. * SECTION 8  FIGURES
+. *----------------------------------------------------------------------------
+. * One standalone, publication-quality figure PER COUNTRY, written to
+. * $OUT/figs/. Each figure shows:
+. *     - the observed log relative income series
+. *     - the fitted piecewise trend implied by the estimated break dates
+. *     - vertical markers at the break dates (also flagged on the x axis)
+. *     - a reference line at y = 0 (the OECD15 average)
+. *     - the test result (tau, 5% critical value, decision) in the subtitle
+. * Plus two cross-country summary figures.
+. *============================================================================
+. 
+. di as txt _n "{hline 78}"
+
+------------------------------------------------------------------------------
+
+. di as res  "  SECTION 8: Figures"
+  SECTION 8: Figures
+
+. di as txt  "{hline 78}"
+------------------------------------------------------------------------------
+
+. 
+. capture mkdir "$OUT/figs"
+
+. 
+. * Build graphs without opening windows; graph export still works.
+. set graphics off
+
+. 
+. * --- shared look ------------------------------------------------------------
+. * Deep blue for the data, muted red for the fitted trend, grey furniture.
+. local C_DATA  "26 82 118"
+
+. local C_FIT   "176 58 46"
+
+. local C_BRK   "176 58 46"
+
+. local C_GRID  "gs15"
+
+. local C_SUB   "gs7"
+
+. 
+. local OPTS_REGION graphregion(color(white) lcolor(white) margin(medium)) plotregion(lcolor(none) margin(zero))
+
+. local OPTS_Y      ylabel(, angle(0) labsize(small) grid glcolor(`C_GRID') glwidth(vthin) glpattern(solid))
+
+. local OPTS_X      xlabel(1870(20)1990, labsize(small) nogrid)
+
+. 
+. foreach i of local cids {
+  2.     quietly levelsof country if cid==`i', local(cn) clean
+  3. 
+.     * reset per-iteration so a previous country's values cannot leak through
+.     local bk1 = .
+  4.     local bk2 = .
+  5.     local tauv = .
+  6.     local cv5v = .
+  7.     local decv ""
+  8. 
+.     * pull break dates and test results from Table 1
+.     preserve
+  9.         quietly use "$OUT/table1_two_break.dta", clear
+ 10.         quietly keep if country == "`cn'"
+ 11.         if _N > 0 {
+ 12.             local bk1  = tb1[1]
+ 13.             local bk2  = tb2[1]
+ 14.             local tauv = tau[1]
+ 15.             local cv5v = cv5[1]
+ 16.             local decv = decision[1]
+ 17.         }
+ 18.     restore
+ 19.     if missing(`bk1') {
+ 20.         di as err "  `cn': no break dates, figure skipped"
+ 21.         continue
+ 22.     }
+ 23. 
+.     local nm = subinstr("`cn'", " ", "_", .)
+ 24. 
+.     * break markers (tolerate a missing second break)
+.     local xlines "`bk1'"
+ 25.     local brklab "`bk1'"
+ 26.     if !missing(`bk2') {
+ 27.         local xlines "`xlines' `bk2'"
+ 28.         local brklab "`brklab' and `bk2'"
+ 29.     }
+ 30. 
+.     * numbers for the subtitle
+.     local taufmt = string(`tauv', "%6.3f")
+ 31.     local cvfmt  = string(`cv5v', "%6.3f")
+ 32. 
+.     preserve
+ 33.         quietly keep if cid==`i'
+ 34.         quietly tsset year, yearly
+ 35. 
+.         * fitted piecewise trend at the estimated break dates
+.         quietly gen double _t  = _n
+ 36.         quietly gen double _D1 = (year >  `bk1')
+ 37.         quietly gen double _T1 = (year - `bk1') * (year > `bk1')
+ 38.         local rhs "_t _D1 _T1"
+ 39.         if !missing(`bk2') {
+ 40.             quietly gen double _D2 = (year >  `bk2')
+ 41.             quietly gen double _T2 = (year - `bk2') * (year > `bk2')
+ 42.             local rhs "`rhs' _D2 _T2"
+ 43.         }
+ 44.         capture quietly regress y `rhs'
+ 45.         if _rc == 0 {
+ 46.             quietly predict double _yhat, xb
+ 47.             local fitline (line _yhat year, lcolor("`C_FIT'") lwidth(medthick) lpattern(dash))
+ 48.             local leg legend(order(1 "Observed" 2 "Piecewise trend at estimated breaks") ///
+>                        rows(1) size(vsmall) region(lstyle(none) color(none)) position(6) bmargin(zero))
+ 49.         }
+ 50.         else {
+ 51.             local fitline ""
+ 52.             local leg legend(off)
+ 53.         }
+ 54. 
+.         twoway (line y year, lcolor("`C_DATA'") lwidth(medthick)) ///
+>                `fitline' ///
+>             , xline(`xlines', lpattern(shortdash) lcolor("`C_BRK'") lwidth(thin)) ///
+>               yline(0, lcolor(gs11) lwidth(vthin) lpattern(solid)) ///
+>               xmlabel(`xlines', labcolor("`C_BRK'") labsize(vsmall) tlcolor("`C_BRK'")) ///
+>               title("`cn'", size(medlarge) color(black) position(11) justification(left)) ///
+>               subtitle("Two-break LM: {&tau} = `taufmt', 5% CV = `cvfmt'  -  `decv'", ///
+>                        size(small) color(`C_SUB') position(11) justification(left)) ///
+>               ytitle("Log relative per-capita income", size(small) margin(medium)) ///
+>               xtitle("") ///
+>               `OPTS_Y' `OPTS_X' ///
+>               note("Vertical lines: estimated breaks (`brklab'). Horizontal line: OECD15 average (y = 0)." ///
+>                    "Data: Maddison Project Database 2023.", size(vsmall) color(gs9) span) ///
+>               `OPTS_REGION' `leg' ///
+>               xsize(8) ysize(5)
+ 55. 
+.         graph export "$OUT/figs/fig_`nm'.png", replace width(2400)
+ 56.         di as txt "  saved: figs/fig_`nm'.png"
+ 57.     restore
+ 58. }
+(file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/figs/fig_France.png not found)
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/figs/fig_France.png saved as PNG format
+  saved: figs/fig_France.png
+(file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/figs/fig_United_Kingdom.png not found)
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/figs/fig_United_Kingdom.png saved as PNG format
+  saved: figs/fig_United_Kingdom.png
+(file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/figs/fig_United_States.png not found)
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/figs/fig_United_States.png saved as PNG format
+  saved: figs/fig_United_States.png
+
+. 
+. *--- Summary figure 1: tau vs 5% critical value, all countries ---------------
+. preserve
+
+.     use "$OUT/table1_two_break.dta", clear
+
+.     quietly drop if missing(tau)
+
+.     if _N >= 2 {
+.         gsort -tau
+.         gen int pos = _n
+. 
+.         * y-axis labels: one country name per row
+.         local ylab ""
+.         forvalues r = 1/`=_N' {
+  2.             local cnm = country[`r']
+  3.             local ylab `"`ylab' `r' "`cnm'""'
+  4.         }
+. 
+.         twoway (rspike tau cv5 pos, horizontal lcolor(gs13) lwidth(medium)) ///
+>                (scatter pos tau, msymbol(O) mcolor("26 82 118") msize(medium)) ///
+>                (scatter pos cv5, msymbol(pipe) mcolor("176 58 46") msize(large)) ///
+>             , ylabel(`ylab', angle(0) labsize(small) nogrid) ///
+>               yscale(reverse) ///
+>               xlabel(, labsize(small) grid glcolor(gs15) glwidth(vthin)) ///
+>               ytitle("") xtitle("Test statistic", size(small) margin(medium)) ///
+>               title("Two-break LM test results", size(medlarge) color(black) position(11) justification(left)) ///
+>               subtitle("Unit root is rejected when {&tau} lies to the left of the 5% critical value", ///
+>                        size(small) color(gs7) position(11) justification(left)) ///
+>               legend(order(2 "{&tau} (test statistic)" 3 "5% critical value") ///
+>                      rows(1) size(vsmall) region(lstyle(none) color(none)) position(6) bmargin(zero)) ///
+>               graphregion(color(white) lcolor(white) margin(medium)) ///
+>               plotregion(lcolor(none)) ///
+>               xsize(8) ysize(6)
+.         graph export "$OUT/figs/fig_summary_test_results.png", replace width(2400)
+(file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/figs/fig_summary_test_results.png not found)
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/figs/fig_summary_test_results.png saved as PNG format
+.         di as txt "  saved: figs/fig_summary_test_results.png"
+  saved: figs/fig_summary_test_results.png
+.     }
+
+. restore
+
+. 
+. *--- Summary figure 2: timing of the estimated breaks ------------------------
+. preserve
+
+.     use "$OUT/table1_two_break.dta", clear
+
+.     quietly drop if missing(tb1)
+
+.     if _N >= 2 {
+.         gsort tb1
+.         gen int pos = _n
+.         local ylab ""
+.         forvalues r = 1/`=_N' {
+  2.             local cnm = country[`r']
+  3.             local ylab `"`ylab' `r' "`cnm'""'
+  4.         }
+. 
+.         twoway (rspike tb1 tb2 pos, horizontal lcolor(gs13) lwidth(medium)) ///
+>                (scatter pos tb1, msymbol(O) mcolor("26 82 118") msize(medium)) ///
+>                (scatter pos tb2, msymbol(D) mcolor("176 58 46") msize(medium)) ///
+>             , ylabel(`ylab', angle(0) labsize(small) nogrid) ///
+>               yscale(reverse) ///
+>               xlabel(1870(20)1990, labsize(small) grid glcolor(gs15) glwidth(vthin)) ///
+>               ytitle("") xtitle("") ///
+>               title("Timing of the estimated structural breaks", size(medlarge) color(black) position(11) justificatio
+> n(left)) ///
+>               subtitle("Each line spans a country's two estimated break dates", ///
+>                        size(small) color(gs7) position(11) justification(left)) ///
+>               legend(order(2 "First break" 3 "Second break") ///
+>                      rows(1) size(vsmall) region(lstyle(none) color(none)) position(6) bmargin(zero)) ///
+>               graphregion(color(white) lcolor(white) margin(medium)) ///
+>               plotregion(lcolor(none)) ///
+>               xsize(8) ysize(6)
+.         graph export "$OUT/figs/fig_summary_break_timing.png", replace width(2400)
+(file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/figs/fig_summary_break_timing.png not found)
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/figs/fig_summary_break_timing.png saved as PNG format
+.         di as txt "  saved: figs/fig_summary_break_timing.png"
+  saved: figs/fig_summary_break_timing.png
+.     }
+
+. restore
+
+. 
+. set graphics on
+
+. 
+. di as txt _n "  All figures written to: " as res "$OUT/figs"
+
+  All figures written to: C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/figs
+
+. 
+. *============================================================================
+. * SECTION 9  EXCEL WORKBOOK
+. *============================================================================
+. 
+. di as txt _n "{hline 78}"
+
+------------------------------------------------------------------------------
+
+. di as res  "  SECTION 9: Excel export"
+  SECTION 9: Excel export
+
+. di as txt  "{hline 78}"
+------------------------------------------------------------------------------
+
+. 
+. local XLS "$OUT/lsmlm_oecd15_results.xlsx"
+
+. 
+. preserve
+
+.     use "$OUT/desc_stats.dta", clear
+
+.     export excel using "`XLS'", sheet("Descriptives") firstrow(variables) replace
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/lsmlm_oecd15_results.xlsx saved
+
+. restore
+
+. preserve
+
+.     use "$OUT/table1_two_break.dta", clear
+
+.     export excel using "`XLS'", sheet("Table1_TwoBreak") firstrow(variables) sheetmodify
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/lsmlm_oecd15_results.xlsx saved
+
+. restore
+
+. preserve
+
+.     use "$OUT/table2_one_break.dta", clear
+
+.     export excel using "`XLS'", sheet("Table2_OneBreak") firstrow(variables) sheetmodify
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/lsmlm_oecd15_results.xlsx saved
+
+. restore
+
+. preserve
+
+.     use "$OUT/table3_subsamples.dta", clear
+
+.     export excel using "`XLS'", sheet("Table3_Subsamples") firstrow(variables) sheetmodify
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/lsmlm_oecd15_results.xlsx saved
+
+. restore
+
+. preserve
+
+.     use "$OUT/piecewise_trends.dta", clear
+
+.     export excel using "`XLS'", sheet("PiecewiseTrends") firstrow(variables) sheetmodify
+file C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/lsmlm_oecd15_results.xlsx saved
+
+. restore
+
+. 
+. di as txt "  saved: `XLS'"
+  saved: C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/lsmlm_oecd15_results.xlsx
+
+. 
+. timer off 1
+
+. quietly timer list 1
+
+. di as txt _n "{hline 78}"
+
+------------------------------------------------------------------------------
+
+. di as res  "  FINISHED"
+  FINISHED
+
+. di as txt  "{hline 78}"
+------------------------------------------------------------------------------
+
+. di as txt "  Elapsed time: " as res %8.1f r(t1) as txt " seconds"
+  Elapsed time:    503.5 seconds
+
+. di as txt "  Output folder: " as res "$OUT"
+  Output folder: C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs
+
+. if `QUICK' {
+.     di as txt _n as err "  NOTE: this was a QUICK run (3 countries, maxlag `MAXLAG')."
+
+  NOTE: this was a QUICK run (3 countries, maxlag 2).
+.     di as err  "        Set  local QUICK = 0  near the top for the full analysis."
+        Set  local QUICK = 0  near the top for the full analysis.
+. }
+
+. 
+. log close main
+      name:  main
+       log:  C:\Users\ibrah\OneDrive\Masaüstü\lsmlm\outputs/lsmlm_oecd15_analysis.log
+  log type:  text
+ closed on:  22 Jul 2026, 12:32:44
+------------------------------------------------------------------------------------------------------------------------

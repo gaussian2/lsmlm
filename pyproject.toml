@@ -1,0 +1,133 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lsmlm"
+dynamic = ["version"]
+description = "Lee-Strazicich minimum LM unit root test with zero, one, or two structural breaks (Python port of the Stata lsmlm command)"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+requires-python = ">=3.10"
+authors = [{ name = "Junsoo Lee" }]
+keywords = [
+    "unit root",
+    "structural break",
+    "Lee-Strazicich",
+    "LM test",
+    "Schmidt-Phillips",
+    "time series",
+    "econometrics",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Typing :: Typed",
+]
+dependencies = ["numpy>=1.22"]
+
+[project.optional-dependencies]
+# load_oecd15() returns a pandas DataFrame
+data = ["pandas>=1.4"]
+# everything the worked example in examples/ needs
+examples = ["pandas>=1.4", "matplotlib>=3.5", "openpyxl>=3.0"]
+test = ["pytest>=7.0", "pytest-cov>=4.0", "pandas>=1.4"]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pandas>=1.4",
+    "matplotlib>=3.5",
+    "openpyxl>=3.0",
+    "ruff>=0.6",
+    "mypy>=1.10",
+    "build>=1.0",
+]
+
+[project.urls]
+Homepage = "https://gaussian2.github.io/lsmlm/"
+Documentation = "https://gaussian2.github.io/lsmlm/"
+Repository = "https://github.com/gaussian2/lsmlm"
+Issues = "https://github.com/gaussian2/lsmlm/issues"
+Changelog = "https://github.com/gaussian2/lsmlm/blob/main/CHANGELOG.md"
+
+[tool.hatch.version]
+path = "src/lsmlm/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lsmlm"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/examples",
+    "/reference",
+    "/README.md",
+    "/CHANGELOG.md",
+    "/VALIDATION.md",
+    "/LICENSE",
+    "/THIRD_PARTY_NOTICES.md",
+    "/CITATION.cff",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests", "src"]
+addopts = ["-ra", "--strict-markers", "--strict-config", "--doctest-modules"]
+xfail_strict = true
+filterwarnings = [
+    "error",
+    # deprecation notices raised inside third-party libraries are not ours to fix
+    "default::DeprecationWarning",
+    "default::PendingDeprecationWarning",
+]
+markers = ["slow: end-to-end runs that take several seconds"]
+
+[tool.coverage.run]
+source = ["lsmlm"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+exclude_also = ["if TYPE_CHECKING:"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "PT", "RUF", "NPY", "D"]
+ignore = [
+    "N803", # argument names such as tB1 mirror the Stata r() names
+    "N815",
+    "N806",
+    "D105",
+    "D107",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+"examples/*" = ["D103"]
+"reference/*" = ["D103"]
+
+[tool.mypy]
+strict = true
+files = ["src/lsmlm"]
+
+[[tool.mypy.overrides]]
+module = ["pandas", "pandas.*"]
+ignore_missing_imports = true

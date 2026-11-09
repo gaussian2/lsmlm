@@ -1,0 +1,415 @@
+{
+  "stata_command": "lsmlm 1.1.0 20jul2026",
+  "stata_run": "lsmlm_oecd15_analysis.do, QUICK = 1, 22 Jul 2026",
+  "cases": [
+    {
+      "id": "table1-France",
+      "source": "table1_two_break.dta",
+      "country": "France",
+      "start": 1870,
+      "end": 1994,
+      "options": {
+        "breaks": 2,
+        "model": "break",
+        "maxlag": 2,
+        "mindist": 5,
+        "trim": 0.1
+      },
+      "expected": {
+        "N": 123,
+        "k": 1,
+        "tb1": 1939,
+        "tb2": 1947,
+        "lambda1": 0.5447154471544715,
+        "lambda2": 0.6097560975609756,
+        "tau": -7.221908096418698,
+        "cv1": -6.107773333333333,
+        "cv5": -5.417946666666667,
+        "cv10": -5.161826666666666,
+        "reject1": true,
+        "reject5": true,
+        "reject10": true,
+        "break1_sig10": true,
+        "break2_sig10": true,
+        "tB1": -0.0268655050161319,
+        "tD1": -5.317221200813606,
+        "tB2": -0.6106342870554343,
+        "tD2": 5.942064498383083
+      }
+    },
+    {
+      "id": "table1-United Kingdom",
+      "source": "table1_two_break.dta",
+      "country": "United Kingdom",
+      "start": 1870,
+      "end": 1994,
+      "options": {
+        "breaks": 2,
+        "model": "break",
+        "maxlag": 2,
+        "mindist": 5,
+        "trim": 0.1
+      },
+      "expected": {
+        "N": 123,
+        "k": 1,
+        "tb1": 1938,
+        "tb2": 1948,
+        "lambda1": 0.5365853658536586,
+        "lambda2": 0.6178861788617886,
+        "tau": -4.680104157966857,
+        "cv1": -6.107773333333333,
+        "cv5": -5.417946666666667,
+        "cv10": -5.161826666666666,
+        "reject1": false,
+        "reject5": false,
+        "reject10": false,
+        "break1_sig10": true,
+        "break2_sig10": true,
+        "tB1": -2.425185192622454,
+        "tD1": 3.396045872388226,
+        "tB2": 0.4729768011261891,
+        "tD2": -3.871148530118062
+      }
+    },
+    {
+      "id": "table1-United States",
+      "source": "table1_two_break.dta",
+      "country": "United States",
+      "start": 1870,
+      "end": 1994,
+      "options": {
+        "breaks": 2,
+        "model": "break",
+        "maxlag": 2,
+        "mindist": 5,
+        "trim": 0.1
+      },
+      "expected": {
+        "N": 122,
+        "k": 2,
+        "tb1": 1927,
+        "tb2": 1947,
+        "lambda1": 0.4426229508196721,
+        "lambda2": 0.6065573770491803,
+        "tau": -4.518985750277142,
+        "cv1": -6.178586666666666,
+        "cv5": -5.625093333333333,
+        "cv10": -5.294613333333333,
+        "reject1": false,
+        "reject5": false,
+        "reject10": false,
+        "break1_sig10": true,
+        "break2_sig10": false,
+        "tB1": -0.5968259735926867,
+        "tD1": -2.36085668855646,
+        "tB2": 1.491359535670947,
+        "tD2": -1.082014068376661
+      }
+    },
+    {
+      "id": "table2-France",
+      "source": "table2_one_break.dta",
+      "country": "France",
+      "start": 1870,
+      "end": 1994,
+      "options": {
+        "breaks": 1,
+        "model": "break",
+        "maxlag": 2,
+        "trim": 0.1
+      },
+      "expected": {
+        "N": 123,
+        "k": 1,
+        "tb1": 1946,
+        "lambda1": 0.6016260162601627,
+        "tau": -4.556426018970106,
+        "cv1": -4.706629105691056,
+        "cv5": -4.161685853658536,
+        "cv10": -3.886618211382114,
+        "reject1": false,
+        "reject5": true,
+        "reject10": true,
+        "break1_sig10": true,
+        "tB1": -2.370407913287597,
+        "tD1": 0.9970028115628329
+      }
+    },
+    {
+      "id": "table2-United Kingdom",
+      "source": "table2_one_break.dta",
+      "country": "United Kingdom",
+      "start": 1870,
+      "end": 1994,
+      "options": {
+        "breaks": 1,
+        "model": "break",
+        "maxlag": 2,
+        "trim": 0.1
+      },
+      "expected": {
+        "N": 123,
+        "k": 1,
+        "tb1": 1947,
+        "lambda1": 0.6097560975609756,
+        "tau": -3.665124915445862,
+        "cv1": -4.705741300813008,
+        "cv5": -4.160648455284552,
+        "cv10": -3.884842601626016,
+        "reject1": false,
+        "reject5": false,
+        "reject10": false,
+        "break1_sig10": true,
+        "tB1": 0.8595467996903058,
+        "tD1": -1.791862789737674
+      }
+    },
+    {
+      "id": "table2-United States",
+      "source": "table2_one_break.dta",
+      "country": "United States",
+      "start": 1870,
+      "end": 1994,
+      "options": {
+        "breaks": 1,
+        "model": "break",
+        "maxlag": 2,
+        "trim": 0.1
+      },
+      "expected": {
+        "N": 122,
+        "k": 2,
+        "tb1": 1905,
+        "lambda1": 0.2622950819672131,
+        "tau": -3.841262749165207,
+        "cv1": -4.649254863387978,
+        "cv5": -4.097723060109289,
+        "cv10": -3.814716065573771,
+        "reject1": false,
+        "reject5": false,
+        "reject10": true,
+        "break1_sig10": false,
+        "tB1": 1.401977355516384,
+        "tD1": -1.551114818878151
+      }
+    },
+    {
+      "id": "table3-pre-war-France",
+      "source": "table3_subsamples.dta",
+      "country": "France",
+      "start": 1870,
+      "end": 1945,
+      "options": {
+        "breaks": 2,
+        "model": "break",
+        "maxlag": 2,
+        "mindist": 5,
+        "trim": 0.1
+      },
+      "expected": {
+        "N": 74,
+        "k": 1,
+        "tb1": 1921,
+        "tb2": 1936,
+        "tau": -5.109493774708466,
+        "cv1": -6.75,
+        "cv5": -6.108,
+        "cv10": -5.779,
+        "reject10": false
+      }
+    },
+    {
+      "id": "table3-pre-war-United Kingdom",
+      "source": "table3_subsamples.dta",
+      "country": "United Kingdom",
+      "start": 1870,
+      "end": 1945,
+      "options": {
+        "breaks": 2,
+        "model": "break",
+        "maxlag": 2,
+        "mindist": 5,
+        "trim": 0.1
+      },
+      "expected": {
+        "N": 74,
+        "k": 1,
+        "tb1": 1915,
+        "tb2": 1926,
+        "tau": -4.997053452071317,
+        "cv1": -6.963,
+        "cv5": -6.201,
+        "cv10": -5.89,
+        "reject10": false
+      }
+    },
+    {
+      "id": "table3-pre-war-United States",
+      "source": "table3_subsamples.dta",
+      "country": "United States",
+      "start": 1870,
+      "end": 1945,
+      "options": {
+        "breaks": 2,
+        "model": "break",
+        "maxlag": 2,
+        "mindist": 5,
+        "trim": 0.1
+      },
+      "expected": {
+        "N": 73,
+        "k": 2,
+        "tb1": 1877,
+        "tb2": 1930,
+        "tau": -4.949839339789649,
+        "cv1": -6.821,
+        "cv5": -5.917,
+        "cv10": -5.541,
+        "reject10": false
+      }
+    },
+    {
+      "id": "table3-post-war-France",
+      "source": "table3_subsamples.dta",
+      "country": "France",
+      "start": 1946,
+      "end": 1994,
+      "options": {
+        "breaks": 1,
+        "model": "break",
+        "maxlag": 2,
+        "mindist": 5,
+        "trim": 0.1
+      },
+      "expected": {
+        "N": 46,
+        "k": 2,
+        "tb1": 1976,
+        "tau": -3.184075991177273,
+        "cv1": -4.901869565217392,
+        "cv5": -4.340608695652174,
+        "cv10": -4.061391304347826,
+        "reject10": false
+      }
+    },
+    {
+      "id": "table3-post-war-United Kingdom",
+      "source": "table3_subsamples.dta",
+      "country": "United Kingdom",
+      "start": 1946,
+      "end": 1994,
+      "options": {
+        "breaks": 1,
+        "model": "break",
+        "maxlag": 2,
+        "mindist": 5,
+        "trim": 0.1
+      },
+      "expected": {
+        "N": 48,
+        "k": 0,
+        "tb1": 1978,
+        "tau": -2.739383676273141,
+        "cv1": -4.891666666666667,
+        "cv5": -4.325166666666667,
+        "cv10": -4.043333333333333,
+        "reject10": false
+      }
+    },
+    {
+      "id": "table3-post-war-United States",
+      "source": "table3_subsamples.dta",
+      "country": "United States",
+      "start": 1946,
+      "end": 1994,
+      "options": {
+        "breaks": 1,
+        "model": "break",
+        "maxlag": 2,
+        "mindist": 5,
+        "trim": 0.1
+      },
+      "expected": {
+        "N": 48,
+        "k": 0,
+        "tb1": 1978,
+        "tau": -3.107704119430913,
+        "cv1": -4.891666666666667,
+        "cv5": -4.325166666666667,
+        "cv10": -4.043333333333333,
+        "reject10": false
+      }
+    }
+  ],
+  "piecewise_trends": [
+    {
+      "country": "France",
+      "tb1": 1939.0,
+      "tb2": 1947.0,
+      "b_t": 0.0016048640194158696,
+      "b_D1": -0.4176872966063531,
+      "b_T1": 0.001629124642660631,
+      "b_D2": 0.3306912367885002,
+      "b_T2": 0.000584063531573262,
+      "r2": 0.7062118983757826,
+      "N": 125.0
+    },
+    {
+      "country": "United Kingdom",
+      "tb1": 1938.0,
+      "tb2": 1948.0,
+      "b_t": -0.004146514684149016,
+      "b_D1": 0.14586846472979276,
+      "b_T1": -0.0013736325182379455,
+      "b_D2": -0.1581648972393443,
+      "b_T2": -0.000318311155819102,
+      "r2": 0.9301186578084124,
+      "N": 125.0
+    },
+    {
+      "country": "United States",
+      "tb1": 1927.0,
+      "tb2": 1947.0,
+      "b_t": 0.0040998822762661705,
+      "b_D1": -0.30658549721187606,
+      "b_T1": 0.013199873467008707,
+      "b_D2": -0.16014296891117477,
+      "b_T2": -0.02211210455262493,
+      "r2": 0.6793684255326033,
+      "N": 125.0
+    }
+  ],
+  "descriptives": [
+    {
+      "country": "France",
+      "N": 125.0,
+      "mean_gdppc": 9893.225640625,
+      "mean_rel": 0.8980906093049283,
+      "mean_y": -0.1151907594821578,
+      "sd_y": 0.13095136983693925,
+      "min_y": -0.7763393877414195,
+      "max_y": 0.0363893577918481
+    },
+    {
+      "country": "United Kingdom",
+      "N": 125.0,
+      "mean_gdppc": 11645.744671875,
+      "mean_rel": 1.24469938199064,
+      "mean_y": 0.2014074286665756,
+      "sd_y": 0.19002408782429747,
+      "min_y": -0.1340832631878581,
+      "max_y": 0.49583472486640867
+    },
+    {
+      "country": "United States",
+      "N": 125.0,
+      "mean_gdppc": 15124.8851171875,
+      "mean_rel": 1.49837511540907,
+      "mean_y": 0.3979446906663796,
+      "sd_y": 0.113073651383692,
+      "min_y": 0.20382872321284762,
+      "max_y": 0.744909122311551
+    }
+  ]
+}

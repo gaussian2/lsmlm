@@ -1,0 +1,52 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it and the papers it implements."
+title: "lsmlm: Lee-Strazicich minimum LM unit root test with structural breaks, for Python"
+type: software
+version: 1.2.0
+license: MIT
+repository-code: "https://github.com/gaussian2/lsmlm"
+url: "https://gaussian2.github.io/lsmlm/"
+authors:
+  - family-names: Lee
+    given-names: Junsoo
+    affiliation: University of Alabama
+references:
+  - type: article
+    title: "Minimum Lagrange multiplier unit root test with two structural breaks"
+    authors:
+      - family-names: Lee
+        given-names: Junsoo
+      - family-names: Strazicich
+        given-names: Mark C.
+    journal: "Review of Economics and Statistics"
+    volume: 85
+    issue: 4
+    start: 1082
+    end: 1089
+    year: 2003
+  - type: article
+    title: "Minimum LM unit root test with one structural break"
+    authors:
+      - family-names: Lee
+        given-names: Junsoo
+      - family-names: Strazicich
+        given-names: Mark C.
+    journal: "Economics Bulletin"
+    volume: 33
+    issue: 4
+    start: 2483
+    end: 2492
+    year: 2013
+  - type: software
+    title: "LSMLM: Lee-Strazicich minimum LM unit root test with structural breaks (Stata module)"
+    authors:
+      - family-names: Ongoren
+        given-names: Ibrahim
+    notes: "Statistical Software Components S459809"
+    year: 2026
+  - type: software
+    title: "LEESTRA: Lee-Strazicich LM unit root test (Stata module)"
+    authors:
+      - family-names: Eruygur
+        given-names: H. Ozan
+    notes: "Statistical Software Components S459688"
