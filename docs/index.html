@@ -50,7 +50,8 @@ aside a.active { background: var(--accent-soft); color: var(--accent); font-weig
 main { padding: 40px 48px 80px; min-width: 0; }
 main > section { max-width: 780px; }
 h1 { font: 700 40px/1.1 var(--mono); margin: 0 0 6px; letter-spacing: -.02em; }
-.tagline { font-size: 19px; color: var(--muted); margin: 0 0 18px; }
+.tagline { font-size: 19px; color: var(--muted); margin: 0 0 6px; }
+.byline { font-size: 15px; margin: 0 0 18px; }
 .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; font-size: 12px; color: var(--muted); }
 .badges img { height: 20px; display: block; }
 h2 { font-size: 26px; margin: 56px 0 12px; padding-top: 20px; border-top: 1px solid var(--line); letter-spacing: -.01em; }
@@ -136,6 +137,7 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
 <section id="introduction">
   <h1>lsmlm</h1>
   <p class="tagline">Lee-Strazicich minimum LM unit root test with structural breaks, for Python.</p>
+  <p class="byline">By <strong>Junsoo Lee</strong>, University of Alabama</p>
   <div class="badges">
     <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-blue">
     <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-yellow">
@@ -146,6 +148,11 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
   (trend-)stationary series, allowing for <strong>zero, one or two structural breaks whose dates are
   chosen from the data</strong>. It implements the minimum Lagrange multiplier (LM) test of Lee and
   Strazicich (2003, 2013) and, with no breaks, the LM test of Schmidt and Phillips (1992).</p>
+
+  <p>The package is written by Junsoo Lee, the co-author of the test, and is based on his research:
+  the two-break test of Lee and Strazicich (2003), the one-break test of Lee and Strazicich (2013)
+  and its application to income convergence in Strazicich, Lee and Day (2004). See
+  <a href="#references">References</a>.</p>
 
   <p>Standard unit root tests lose power when a real break is ignored, and ADF-type tests with
   endogenous breaks can reject spuriously when the break occurs under the null. The minimum LM test
@@ -547,7 +554,8 @@ pytest</code></pre>
 </section>
 
 <footer>
-  <code>lsmlm</code> is maintained by Junsoo Lee, University of Alabama.
+  <code>lsmlm</code> is written and maintained by Junsoo Lee, University of Alabama, co-author of the
+  Lee-Strazicich test.
   Source on <a href="https://github.com/gaussian2/lsmlm">GitHub</a>.
 </footer>
 

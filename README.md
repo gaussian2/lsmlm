@@ -9,6 +9,9 @@ structural breaks, for Python.
 
 Documentation: <https://gaussian2.github.io/lsmlm/>
 
+Author: Junsoo Lee, University of Alabama. The package is based on his research
+on the test (Lee and Strazicich 2003, 2013; Strazicich, Lee and Day 2004).
+
 This is a port of the Stata command `lsmlm` (v1.1.0) by Ibrahim Ongoren,
 Pamukkale University. It follows the Stata code step by step and reproduces its
 results: on every stored result of the Stata reference run the two agree to
@@ -211,7 +214,8 @@ MIT License; see [LICENSE](LICENSE). Notices for the third-party material the
 package includes or derives from are in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-- The Python package is by Junsoo Lee (University of Alabama).
+- The Python package is by Junsoo Lee (University of Alabama), co-author of the
+  Lee-Strazicich test.
 - The Stata command `lsmlm`, which this package ports, was written by Ibrahim
   Ongoren (Pamukkale University).
 - The critical-value tables and interpolation routines come from the `leestra`
